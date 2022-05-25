@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+import logging
 
 # Create your views here.
 
@@ -18,7 +19,6 @@ class ProductList(APIView):
     def get(self, request, *args, **kwargs):
         queryset = Product.objects.all()
         serializer = ProductSerializer(queryset, many=True)
-
         return Response(serializer.data)
 
 
@@ -31,9 +31,13 @@ class ProductDetail(APIView):
         except Product.DoesNotExist:
             raise Http404
 
-    @method_decorator(cache_page(60*15))
-    @method_decorator(vary_on_cookie)
     def get(self, request, pk, format=None):
-        product = self.get_object(pk)
+        product = cache.get(pk)
+        if product is not None:
+            print("data from cache")
+        else:
+            product = self.get_object(pk)
+            print("data from database")
+            cache.set(pk, product)
         serializer = ProductSerializer(product)
         return Response(serializer.data)
