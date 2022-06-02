@@ -1,1 +1,1 @@
-Small project for university to demonstrate practical use of redis database
+Small project for university to demonstrate practical use of redis database in Django API envriroment.
